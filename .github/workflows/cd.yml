@@ -35,7 +35,13 @@ jobs:
 
       - name: Terraform Init
         working-directory: ./terraform
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="subscription_id=1e702451-e125-465b-ba86-4343891daaa8" \
+            -backend-config="resource_group_name=rg-prism-cluster-shared" \
+            -backend-config="storage_account_name=saprismclustershared" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=terraform.tfstate"
         env:
           ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
           ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
