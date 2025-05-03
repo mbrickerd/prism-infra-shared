@@ -22,6 +22,8 @@ repos:
         args: ["--config", ".terraform-docs.yml", "terraform"]
         name: "📚 Generate Terraform docs"
         files: ^terraform/.*\.tf$
+        pass_filenames: false
+        verbose: true
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.98.0

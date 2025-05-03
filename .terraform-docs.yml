@@ -4,8 +4,8 @@ recursive:
   enabled: false
 output:
   file: "README.md"
-  mode: "inject"
-  template: |-
+  mode: "replace"
+  template: |
     <!-- BEGIN_TF_DOCS -->
     {{ .Content }}
     <!-- END_TF_DOCS -->
