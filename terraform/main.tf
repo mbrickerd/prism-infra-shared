@@ -9,6 +9,12 @@ resource "azuread_service_principal" "prism_terraform_shared" {
   tags      = ["terraform", "shared", "prism-cluster"]
 }
 
+resource "azurerm_role_assignment" "subscription_contributor" {
+  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.prism_terraform_shared.id
+}
+
 resource "azuread_application_federated_identity_credential" "github_infra_shared_main" {
   application_id = module.app_registration.id
   display_name   = "github-infra-shared-main"
@@ -25,12 +31,6 @@ resource "azuread_application_federated_identity_credential" "github_infra_share
   audiences      = ["api://AzureADTokenExchange"]
   issuer         = "https://token.actions.githubusercontent.com"
   subject        = "repo:mbrickerd/prism-infra-shared:pull_request"
-}
-
-resource "azurerm_role_assignment" "subscription_contributor" {
-  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
-  role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.prism_terraform_shared.id
 }
 
 module "resource_group" {
@@ -60,6 +60,12 @@ module "storage_account" {
   }
 }
 
+resource "azurerm_role_assignment" "storage_blob_contributor" {
+  scope                = module.storage_account.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azuread_service_principal.prism_terraform_shared.id
+}
+
 module "storage_container" {
   source = "git::https://github.com/mbrickerd/terraform-azure-modules.git//modules/storage-container?ref=bf4876f9a6db8f130a27e3baa4b3c1c0400c305b"
 
@@ -68,10 +74,12 @@ module "storage_container" {
   metadata           = {}
 }
 
-resource "azurerm_role_assignment" "storage_blob_contributor" {
-  scope                = module.storage_account.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azuread_service_principal.prism_terraform_shared.id
+module "storage_container" {
+  source = "git::https://github.com/mbrickerd/terraform-azure-modules.git//modules/storage-container?ref=bf4876f9a6db8f130a27e3baa4b3c1c0400c305b"
+
+  name               = "data"
+  storage_account_id = module.storage_account.id
+  metadata           = {}
 }
 
 module "container_registry" {
