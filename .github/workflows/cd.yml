@@ -24,7 +24,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.4.2
+          terraform_version: 1.11.2
 
       - name: Azure Login
         uses: azure/login@v2
@@ -36,12 +36,7 @@ jobs:
       - name: Terraform Init
         working-directory: ./terraform
         run: |
-          terraform init \
-            -backend-config="subscription_id=1e702451-e125-465b-ba86-4343891daaa8" \
-            -backend-config="resource_group_name=rg-prism-cluster-shared" \
-            -backend-config="storage_account_name=saprismclustershared" \
-            -backend-config="container_name=tfstate" \
-            -backend-config="key=terraform.tfstate"
+          terraform init
         env:
           ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
           ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
