@@ -1,6 +1,7 @@
 variable "name" {
   description = "The base name that will be used in the resource group naming convention."
   type        = string
+  default     = "prism-cluster"
 }
 
 variable "environment" {
