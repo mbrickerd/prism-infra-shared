@@ -36,6 +36,10 @@ jobs:
       - name: Terraform Init
         working-directory: ./terraform
         run: terraform init
+        env:
+          ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Terraform Format Check
         working-directory: ./terraform
@@ -55,10 +59,18 @@ jobs:
       - name: Terraform Plan
         working-directory: ./terraform
         run: terraform plan -out=plan.tfplan
+        env:
+          ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
       - name: Terraform Apply
         working-directory: ./terraform
         run: terraform apply -auto-approve plan.tfplan
+        env:
+          ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
   upload_data:
     name: Upload Data Files
