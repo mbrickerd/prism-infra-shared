@@ -9,13 +9,22 @@ resource "azuread_service_principal" "prism_terraform_shared" {
   tags      = ["terraform", "shared", "prism-cluster"]
 }
 
-resource "azuread_application_federated_identity_credential" "github_infra_shared" {
+resource "azuread_application_federated_identity_credential" "github_infra_shared_main" {
   application_id = module.app_registration.id
   display_name   = "github-infra-shared-main"
   description    = "Federated identity for GitHub Actions in shared environment resources"
   audiences      = ["api://AzureADTokenExchange"]
   issuer         = "https://token.actions.githubusercontent.com"
   subject        = "repo:mbrickerd/prism-infra-shared:ref:refs/heads/main"
+}
+
+resource "azuread_application_federated_identity_credential" "github_infra_shared_pr" {
+  application_id = module.app_registration.id
+  display_name   = "github-infra-shared-pr"
+  description    = "Federated identity for GitHub Actions in shared environment resources"
+  audiences      = ["api://AzureADTokenExchange"]
+  issuer         = "https://token.actions.githubusercontent.com"
+  subject        = "repo:mbrickerd/prism-infra-shared:pull_request"
 }
 
 resource "azurerm_role_assignment" "subscription_contributor" {
