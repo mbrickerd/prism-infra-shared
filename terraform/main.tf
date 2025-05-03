@@ -1,12 +1,12 @@
 module "app_registration" {
   source = "git::https://github.com/mbrickerd/terraform-azure-modules.git//modules/app-registration?ref=bf4876f9a6db8f130a27e3baa4b3c1c0400c305b"
 
-  display_name = "mb-prism-sensor-clustering"
+  display_name = "mb-prism-sensor-clustering-${var.environment}"
 }
 
 resource "azuread_service_principal" "prism_terraform_shared" {
   client_id = module.app_registration.client_id
-  tags      = ["terraform", "shared", "prism-cluster"]
+  tags      = ["terraform", var.environment, "prism-cluster"]
 }
 
 resource "azurerm_role_assignment" "subscription_contributor" {
@@ -18,7 +18,7 @@ resource "azurerm_role_assignment" "subscription_contributor" {
 resource "azuread_application_federated_identity_credential" "github_infra_shared_main" {
   application_id = module.app_registration.id
   display_name   = "github-infra-shared-main"
-  description    = "Federated identity for GitHub Actions in shared environment resources"
+  description    = "GitHub Actions workflow identity for deployment from main branch of shared infrastructure repository."
   audiences      = ["api://AzureADTokenExchange"]
   issuer         = "https://token.actions.githubusercontent.com"
   subject        = "repo:mbrickerd/prism-infra-shared:ref:refs/heads/main"
@@ -27,7 +27,7 @@ resource "azuread_application_federated_identity_credential" "github_infra_share
 resource "azuread_application_federated_identity_credential" "github_infra_shared_pr" {
   application_id = module.app_registration.id
   display_name   = "github-infra-shared-pr"
-  description    = "Federated identity for GitHub Actions in shared environment resources"
+  description    = "GitHub Actions workflow identity for validation of pull requests in shared infrastructure repository."
   audiences      = ["api://AzureADTokenExchange"]
   issuer         = "https://token.actions.githubusercontent.com"
   subject        = "repo:mbrickerd/prism-infra-shared:pull_request"
