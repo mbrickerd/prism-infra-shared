@@ -110,7 +110,7 @@ module "tfstate_storage_container" {
   metadata           = {}
 }
 
-resource "azurerm_role_assignment" "bootstrap_storage_access" {
+resource "azurerm_role_assignment" "bootstrap_storage_blob_data_contributor" {
   scope                = "${data.azurerm_storage_account.bootstrap.id}/blobServices/default/containers/tfstate"
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azuread_service_principal.prism_terraform_shared.id
@@ -119,6 +119,12 @@ resource "azurerm_role_assignment" "bootstrap_storage_access" {
 resource "azurerm_role_assignment" "bootstrap_storage_reader" {
   scope                = data.azurerm_storage_account.bootstrap.id
   role_definition_name = "Reader"
+  principal_id         = azuread_service_principal.prism_terraform_shared.id
+}
+
+resource "azurerm_role_assignment" "bootstrap_storage_key_operator" {
+  scope                = data.azurerm_storage_account.bootstrap.id
+  role_definition_name = "Storage Account Key Operator Service Role"
   principal_id         = azuread_service_principal.prism_terraform_shared.id
 }
 
