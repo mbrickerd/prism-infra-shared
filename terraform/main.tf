@@ -9,22 +9,22 @@ resource "azuread_service_principal" "prism_terraform_shared" {
   tags      = ["terraform", var.environment, "prism-cluster"]
 }
 
-resource "github_actions_secret" "azure_client_id" {
-  repository      = "prism-infra-shared"
-  secret_name     = "AZURE_CLIENT_ID"
-  plaintext_value = module.app_registration.client_id
+resource "github_actions_variable" "azure_client_id" {
+  repository    = "prism-infra-shared"
+  variable_name = "AZURE_CLIENT_ID"
+  value         = module.app_registration.client_id
 }
 
-resource "github_actions_secret" "azure_subscription_id" {
-  repository      = "prism-infra-shared"
-  secret_name     = "AZURE_SUBSCRIPTION_ID"
-  plaintext_value = data.azurerm_client_config.current.subscription_id
+resource "github_actions_variable" "azure_subscription_id" {
+  repository    = "prism-infra-shared"
+  variable_name = "AZURE_SUBSCRIPTION_ID"
+  value         = data.azurerm_client_config.current.subscription_id
 }
 
-resource "github_actions_secret" "azure_tenant_id" {
-  repository      = "prism-infra-shared"
-  secret_name     = "AZURE_TENANT_ID"
-  plaintext_value = data.azurerm_client_config.current.tenant_id
+resource "github_actions_variable" "azure_tenant_id" {
+  repository    = "prism-infra-shared"
+  variable_name = "AZURE_TENANT_ID"
+  value         = data.azurerm_client_config.current.tenant_id
 }
 
 resource "azuread_application_federated_identity_credential" "github_infra_shared_main" {
