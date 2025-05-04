@@ -22,6 +22,13 @@ repos:
         args: ["--config", ".terraform-docs.yml", "./terraform"]
         name: "📚 Generate Terraform docs"
 
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+        name: "🔧 Fix end of files"
+        files: "./terraform/README.md"
+
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.98.0
     hooks:
