@@ -1,6 +1,6 @@
 formatter: "markdown"
 recursive:
-  enabled: false
+  enabled: true
   path: "."
 output:
   file: "README.md"
