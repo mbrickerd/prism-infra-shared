@@ -9,10 +9,22 @@ resource "azuread_service_principal" "prism_terraform_shared" {
   tags      = ["terraform", var.environment, "prism-cluster"]
 }
 
-resource "azurerm_role_assignment" "subscription_contributor" {
-  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
-  role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.prism_terraform_shared.id
+resource "github_actions_secret" "azure_client_id" {
+  repository      = "prism-infra-shared"
+  secret_name     = "AZURE_CLIENT_ID"
+  plaintext_value = module.app_registration.client_id
+}
+
+resource "github_actions_secret" "azure_subscription_id" {
+  repository      = "prism-infra-shared"
+  secret_name     = "AZURE_SUBSCRIPTION_ID"
+  plaintext_value = data.azurerm_client_config.current.subscription_id
+}
+
+resource "github_actions_secret" "azure_tenant_id" {
+  repository      = "prism-infra-shared"
+  secret_name     = "AZURE_TENANT_ID"
+  plaintext_value = data.azurerm_client_config.current.tenant_id
 }
 
 resource "azuread_application_federated_identity_credential" "github_infra_shared_main" {
@@ -39,6 +51,18 @@ module "resource_group" {
   name        = var.name
   environment = var.environment
   location    = var.location
+
+  tags = {
+    managed_by_terraform = true
+    purpose              = "shared-infrastructure"
+    critical             = "true"
+  }
+}
+
+resource "azurerm_role_assignment" "resource_group_contributor" {
+  scope                = module.resource_group.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.prism_terraform_shared.id
 }
 
 module "storage_account" {
@@ -58,6 +82,18 @@ module "storage_account" {
     virtual_network_subnet_ids = []
     private_link_access        = []
   }
+
+  tags = {
+    managed_by_terraform = true
+    purpose              = "shared-infrastructure"
+    critical             = "true"
+  }
+}
+
+resource "github_actions_secret" "azure_storage_connection_string" {
+  repository      = "prism-infra-shared"
+  secret_name     = "AZURE_STORAGE_CONNECTION_STRING"
+  plaintext_value = module.storage_account.primary_blob_connection_string
 }
 
 resource "azurerm_role_assignment" "storage_blob_contributor" {
@@ -69,9 +105,21 @@ resource "azurerm_role_assignment" "storage_blob_contributor" {
 module "tfstate_storage_container" {
   source = "git::https://github.com/mbrickerd/terraform-azure-modules.git//modules/storage-container?ref=bf4876f9a6db8f130a27e3baa4b3c1c0400c305b"
 
-  name               = "tfstate"
-  storage_account_id = module.storage_account.id
+  name               = "shared-tfstate"
+  storage_account_id = data.azurerm_storage_account.bootstrap.id
   metadata           = {}
+}
+
+resource "azurerm_role_assignment" "bootstrap_storage_access" {
+  scope                = "${data.azurerm_storage_account.bootstrap.id}/blobServices/default/containers/tfstate"
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azuread_service_principal.prism_terraform_shared.id
+}
+
+resource "azurerm_role_assignment" "bootstrap_storage_reader" {
+  scope                = data.azurerm_storage_account.bootstrap.id
+  role_definition_name = "Reader"
+  principal_id         = azuread_service_principal.prism_terraform_shared.id
 }
 
 module "data_storage_container" {
@@ -96,4 +144,10 @@ module "container_registry" {
   data_endpoint_enabled         = false
   georeplications               = []
   network_rule_set              = null
+
+  tags = {
+    managed_by_terraform = true
+    purpose              = "shared-infrastructure"
+    critical             = "true"
+  }
 }
